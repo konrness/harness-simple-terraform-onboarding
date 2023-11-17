@@ -401,6 +401,46 @@ resource "harness_platform_pipeline" "example" {
   EOT
 }
 
+resource "harness_platform_triggers" "exampletrigger" {
+  depends_on = [harness_platform_pipeline.example]
+  identifier = "webhook"
+  org_id     =  var.org_id
+  project_id =  var.project_identifier
+  name       = "webhook"
+  target_id  = harness_platform_pipeline.example.identifier
+  yaml       = <<-EOT
+  trigger:
+    name: webhook
+    identifier: webhook
+    enabled: true
+    description: ""
+    tags: {}
+    stagesToExecute: []
+    orgIdentifier: org.identifier
+    projectIdentifier: project.identifier
+    pipelineIdentifier: Build_and_Deploy_Java_App
+    source:
+      type: Webhook
+      spec:
+        type: Custom
+        spec:
+          payloadConditions: []
+          headerConditions: []
+    inputYaml: |
+      pipeline:
+        identifier: Build_and_Deploy_Java_App
+        template:
+          templateInputs:
+            properties:
+              ci:
+                codebase:
+                  build:
+                    type: branch
+                    spec:
+                      branch: main
+    EOT
+}
+
 resource "harness_platform_pipeline" "ffpipeline" {
   depends_on = [harness_platform_pipeline.example]
   identifier = "Configure_Feature_Flags"
